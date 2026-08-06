@@ -1,6 +1,19 @@
+# IntelliJ IDEA
 .idea/
 *.iml
-*.class
-out/
+
+# Maven generated folders
 target/
-build/
+
+# IntelliJ compiled output
+out/
+
+# Java compiled files
+*.class
+
+# Logs
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
