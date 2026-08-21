@@ -70,12 +70,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         // 3. Validate Authorization header
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange, "Missing or malformed Authorization header");
+             return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or malformed Authorization header"));
         }
 
         String token = authHeader.substring(7);
         if (!jwtUtil.isTokenValid(token)) {
-            return unauthorized(exchange, "Invalid or expired token");
+            return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token"));
         }
 
         // 4. Extract claims and populate internal headers
@@ -90,16 +90,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange.mutate().request(mutatedRequest).build());
     }
 
-    private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-        byte[] bytes = String.format("{\"error\": \"%s\"}", message).getBytes(StandardCharsets.UTF_8);
-        DataBuffer buffer = response.bufferFactory().wrap(bytes);
-
-        return response.writeWith(Mono.just(buffer));
-    }
 
     @Override
     public int getOrder() {
